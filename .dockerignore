@@ -1,0 +1,40 @@
+# Version control
+.git
+.gitignore
+
+# Replit-specific files
+.replit
+.replitignore
+.local/
+.agents/
+
+# Build outputs (will be rebuilt in Docker)
+artifacts/*/dist/
+artifacts/*/public/
+artifacts/*/.tsbuildinfo
+
+# Dev node_modules (will be installed fresh)
+node_modules/
+artifacts/*/node_modules/
+lib/*/node_modules/
+scripts/node_modules/
+
+# Logs
+*.log
+pnpm-debug.log*
+
+# Test files
+**/*.test.ts
+**/*.spec.ts
+
+# Editor configs
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temp files
+/tmp/
+attached_assets/
