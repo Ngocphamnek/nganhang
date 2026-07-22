@@ -1,0 +1,201 @@
+
+Search logs
+
+Live tail
+
+
+
+==> Cloning from https://github.com/Ngocphamnek/nganhang
+==> Checking out commit 4e72a02fe7eea4842e689de928e4e187172c9a4a in branch main
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 3.07kB done
+#1 DONE 0.0s
+#2 [internal] load metadata for docker.io/library/node:20-slim
+#2 ...
+#3 [auth] library/node:pull render-prod/docker-mirror-repository/library/node:pull token for us-west1-docker.pkg.dev
+#3 DONE 0.0s
+#2 [internal] load metadata for docker.io/library/node:20-slim
+#2 DONE 4.9s
+#4 [internal] load .dockerignore
+#4 transferring context: 549B done
+#4 DONE 0.0s
+#5 [internal] load build context
+#5 DONE 0.0s
+#6 [builder  1/13] FROM docker.io/library/node:20-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0
+#6 resolve docker.io/library/node:20-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0 done
+#6 DONE 0.0s
+#7 importing cache manifest
+#7 inferred cache manifest type: application/vnd.oci.image.manifest.v1+json done
+#7 DONE 0.1s
+#6 [builder  1/13] FROM docker.io/library/node:20-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0
+#6 ...
+#5 [internal] load build context
+#5 transferring context: 48.38MB 0.2s done
+#5 DONE 0.2s
+#6 [builder  1/13] FROM docker.io/library/node:20-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0
+#6 extracting sha256:ff86ea2e5edce334d19a34fbc65d1a511aa1fc823dba1110422f991aa56b44d4
+#6 extracting sha256:ff86ea2e5edce334d19a34fbc65d1a511aa1fc823dba1110422f991aa56b44d4 0.5s done
+#6 extracting sha256:e54aec64c365815cd7b91e718f00ac6e625562b1de09036b38614621b42c7582
+#6 extracting sha256:e54aec64c365815cd7b91e718f00ac6e625562b1de09036b38614621b42c7582 0.5s done
+#6 extracting sha256:804d4d68057cbb26cbcde9a735148ebc6589911bad32cf9dbddb5b0ba878bf1f
+#6 extracting sha256:804d4d68057cbb26cbcde9a735148ebc6589911bad32cf9dbddb5b0ba878bf1f 1.1s done
+#6 DONE 5.8s
+#6 [builder  1/13] FROM docker.io/library/node:20-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0
+#6 extracting sha256:64cfb949317c9824fd081d55c59a7225bfe1f650c6395ba42d7ed0ccf51993d2
+#6 extracting sha256:64cfb949317c9824fd081d55c59a7225bfe1f650c6395ba42d7ed0ccf51993d2 0.2s done
+#6 DONE 5.9s
+#6 [builder  1/13] FROM docker.io/library/node:20-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0
+#6 extracting sha256:3c02fd806613748139b8b8a14a69ae3518a1b0e863c57c35aada3b92ed87fb31 0.0s done
+#6 DONE 6.0s
+#8 [production 2/7] WORKDIR /app/artifacts/api-server
+#8 DONE 0.0s
+#9 [builder  2/13] RUN npm install -g pnpm@10
+#9 0.830 
+#9 0.830 added 1 package in 737ms
+#9 0.830 
+#9 0.830 1 package is looking for funding
+#9 0.830   run `npm fund` for details
+#9 0.831 npm notice
+#9 0.831 npm notice New major version of npm available! 10.8.2 -> 12.0.1
+#9 0.831 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.1
+#9 0.831 npm notice To update run: npm install -g npm@12.0.1
+#9 0.831 npm notice
+#9 DONE 1.2s
+#10 [builder  3/13] WORKDIR /app
+#10 DONE 0.0s
+#11 [builder  4/13] COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
+#11 DONE 0.0s
+#12 [builder  5/13] COPY tsconfig.json tsconfig.base.json ./
+#12 DONE 0.0s
+#13 [builder  6/13] COPY lib/      ./lib/
+#13 DONE 0.0s
+#14 [builder  7/13] COPY scripts/  ./scripts/
+#14 DONE 0.0s
+#15 [builder  8/13] COPY artifacts/api-server/   ./artifacts/api-server/
+#15 DONE 0.0s
+#16 [builder  9/13] COPY artifacts/admin-panel/  ./artifacts/admin-panel/
+#16 DONE 0.0s
+#17 [builder 10/13] RUN pnpm install --frozen-lockfile --ignore-scripts=false
+#17 0.404 Scope: all 8 workspace projects
+#17 0.485 Lockfile is up to date, resolution step is skipped
+#17 0.512 Progress: resolved 1, reused 0, downloaded 0, added 0
+#17 0.568 Packages: +606
+#17 0.568 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#17 0.636 
+#17 0.636    ╭──────────────────────────────────────────╮
+#17 0.636    │                                          │
+#17 0.636    │   Update available! 10.34.5 → 11.15.1.   │
+#17 0.636    │   Changelog: https://pnpm.io/v/11.15.1   │
+#17 0.636    │     To update, run: pnpm add -g pnpm     │
+#17 0.636    │                                          │
+#17 0.636    ╰──────────────────────────────────────────╯
+#17 0.636 
+#17 1.528 Progress: resolved 606, reused 0, downloaded 57, added 4
+#17 2.550 Progress: resolved 606, reused 0, downloaded 420, added 102
+#17 2.827  WARN  GET https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-0.27.3.tgz error (ECONNRESET). Will retry in 10 seconds. 2 retries left.
+#17 3.552 Progress: resolved 606, reused 0, downloaded 596, added 179
+#17 4.552 Progress: resolved 606, reused 0, downloaded 603, added 595
+#17 5.552 Progress: resolved 606, reused 0, downloaded 604, added 604
+#17 6.553 Progress: resolved 606, reused 0, downloaded 605, added 605
+#17 12.99 Progress: resolved 606, reused 0, downloaded 606, added 605
+#17 13.00 Progress: resolved 606, reused 0, downloaded 606, added 606, done
+#17 13.13 .../esbuild@0.27.3/node_modules/esbuild postinstall$ node install.js
+#17 13.23 .../esbuild@0.27.3/node_modules/esbuild postinstall: Done
+#17 13.54 
+#17 13.54 dependencies:
+#17 13.54 + @replit/connectors-sdk 0.4.1
+#17 13.54 
+#17 13.54 devDependencies:
+#17 13.54 + prettier 3.9.5
+#17 13.54 + typescript 5.9.3
+#17 13.54 
+#17 13.55 . preinstall$ sh -c 'rm -f package-lock.json yarn.lock; case "$npm_config_user_agent" in pnpm/*) ;; *) echo "Use pnpm instead" >&2; exit 1 ;; esac'
+#17 13.60 . preinstall: Done
+#17 13.72 ╭ Warning ─────────────────────────────────────────────────────────────────────╮
+#17 13.72 │                                                                              │
+#17 13.72 │   Ignored build scripts: bufferutil@4.1.0, es5-ext@0.10.64,                  │
+#17 13.72 │   onnxruntime-node@1.27.0, utf-8-validate@5.0.10, utf-8-validate@6.0.6.      │
+#17 13.72 │   Run "pnpm approve-builds" to pick which dependencies should be allowed     │
+#17 13.72 │   to run scripts.                                                            │
+#17 13.72 │                                                                              │
+#17 13.72 ╰──────────────────────────────────────────────────────────────────────────────╯
+#17 13.83 Done in 13.7s using pnpm v10.34.5
+#17 DONE 14.8s
+#18 [builder 11/13] RUN PORT=3000 BASE_PATH=/ NODE_ENV=production     pnpm --filter @workspace/admin-panel run build
+#18 0.708 
+#18 0.708 > @workspace/admin-panel@0.0.0 build /app/artifacts/admin-panel
+#18 0.708 > vite build --config vite.config.ts
+#18 0.708 
+#18 0.963 vite v7.3.6 building client environment for production...
+#18 1.017 transforming...
+#18 1.306 src/components/ui/tooltip.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+#18 3.230 ✓ 2175 modules transformed.
+#18 3.521 rendering chunks...
+#18 3.531 computing gzip size...
+#18 3.545 dist/public/index.html                   1.38 kB │ gzip:   0.54 kB
+#18 3.545 dist/public/assets/index-DR9d4Ek_.css   99.63 kB │ gzip:  16.26 kB
+#18 3.545 dist/public/assets/index-D52z9XW3.js   477.74 kB │ gzip: 154.24 kB
+#18 3.545 ✓ built in 2.55s
+#18 DONE 3.6s
+#19 [builder 12/13] RUN mkdir -p artifacts/api-server/public &&     cp -r artifacts/admin-panel/dist/public/. artifacts/api-server/public/
+#19 DONE 0.1s
+#20 [builder 13/13] RUN pnpm --filter @workspace/api-server run build
+#20 0.368 
+#20 0.368 > @workspace/api-server@0.0.0 build /app/artifacts/api-server
+#20 0.368 > node ./build.mjs
+#20 0.368 
+#20 0.973 
+#20 0.973   dist/index.mjs                       7.5mb ⚠️
+#20 0.973   dist/pino-worker.mjs               153.4kb
+#20 0.973   dist/pino-file.mjs                 142.0kb
+#20 0.973   dist/pino-pretty.mjs               114.4kb
+#20 0.973   dist/thread-stream-worker.mjs        7.3kb
+#20 0.973   dist/index.mjs.map                  12.9mb
+#20 0.973   dist/pino-worker.mjs.map           256.9kb
+#20 0.973   dist/pino-file.mjs.map             229.0kb
+#20 0.973   dist/pino-pretty.mjs.map           203.6kb
+#20 0.973   dist/thread-stream-worker.mjs.map   12.0kb
+#20 0.973 
+#20 0.973 ⚡ Done in 549ms
+#20 DONE 1.2s
+#21 [production 3/7] COPY --from=builder /app/artifacts/api-server/dist    ./dist
+#21 DONE 0.0s
+#22 [production 4/7] COPY --from=builder /app/artifacts/api-server/public  ./public
+#22 DONE 0.0s
+#23 [production 5/7] COPY --from=builder /app/artifacts/api-server/model.onnx ./model.onnx
+#23 DONE 0.0s
+#24 [production 6/7] COPY --from=builder /app/node_modules ../../node_modules
+#24 DONE 3.3s
+#25 [production 7/7] RUN --mount=type=bind,from=builder,source=/app/artifacts/api-server/node_modules,target=/tmp/pkg_nm     cp -r /tmp/pkg_nm/. ./node_modules/ 2>/dev/null || true
+#25 DONE 0.4s
+#26 exporting to image
+#26 exporting layers
+#26 exporting layers 9.0s done
+#26 pushing layers
+#26 ...
+#27 exporting cache to registry
+#27 preparing build cache for export
+#27 ...
+#26 exporting to image
+#26 pushing layers 5.3s done
+#26 DONE 14.4s
+#27 exporting cache to registry
+#27 sending cache export
+#27 sending cache export 8.2s done
+#27 DONE 40.4s
+==> Deploying...
+==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+/app/node_modules/.pnpm/undici@8.8.0/node_modules/undici/lib/web/cache/cachestorage.js:20
+    webidl.util.markAsUncloneable(this)
+                ^
+TypeError: webidl.util.markAsUncloneable is not a function
+    at new _CacheStorage (/app/node_modules/.pnpm/undici@8.8.0/node_modules/undici/lib/web/cache/cachestorage.js:20:17)
+    at ../../node_modules/.pnpm/undici@8.8.0/node_modules/undici/index.js (/app/node_modules/.pnpm/undici@8.8.0/node_modules/undici/index.js:179:25)
+    at __require2 (file:///app/artifacts/api-server/dist/index.mjs:25:50)
+    at <anonymous> (/app/artifacts/api-server/src/bank/core-bank.ts:6:24)
+    at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+Node.js v20.20.2
+==> Exited with status 1
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
