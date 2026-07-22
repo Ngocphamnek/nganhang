@@ -1,6 +1,5 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
   description: API specification
@@ -10,6 +9,12 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: keys
+    description: Key management
+  - name: settings
+    description: Bot settings
 paths:
   /healthz:
     get:
@@ -24,6 +29,105 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/verify:
+    post:
+      operationId: verifyToken
+      tags: [auth]
+      summary: Verify admin token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TokenInput"
+      responses:
+        "200":
+          description: Token valid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResult"
+        "401":
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResult"
+
+  /keys:
+    get:
+      operationId: listKeys
+      tags: [keys]
+      summary: List generated keys
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Key list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KeyListResult"
+
+  /keys/generate:
+    post:
+      operationId: generateKeys
+      tags: [keys]
+      summary: Generate new keys for a product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateKeysInput"
+      responses:
+        "200":
+          description: Generated keys
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerateKeysResult"
+
+  /settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Get bot settings
+      responses:
+        "200":
+          description: Current settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotSettings"
+    put:
+      operationId: updateSettings
+      tags: [settings]
+      summary: Update bot settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BotSettingsInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateResult"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +138,94 @@ components:
       required:
         - status
 
+    TokenInput:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+
+    AuthResult:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: ["string", "null"]
+
+    GenerateKeysInput:
+      type: object
+      required: [productId, count]
+      properties:
+        productId:
+          type: integer
+        count:
+          type: integer
+          minimum: 1
+          maximum: 100
+
+    GenerateKeysResult:
+      type: object
+      required: [success, keys]
+      properties:
+        success:
+          type: boolean
+        keys:
+          type: array
+          items:
+            type: string
+        message:
+          type: ["string", "null"]
+
+    KeyListResult:
+      type: object
+      required: [keys, total]
+      properties:
+        keys:
+          type: array
+          items:
+            $ref: "#/components/schemas/KeyItem"
+        total:
+          type: integer
+
+    KeyItem:
+      type: object
+      required: [keyCode, productId, isUsed]
+      properties:
+        keyCode:
+          type: string
+        productId:
+          type: integer
+        isUsed:
+          type: boolean
+        usedByTelegramId:
+          type: ["string", "null"]
+        usedAt:
+          type: ["string", "null"]
+        expiresAt:
+          type: ["string", "null"]
+        createdAt:
+          type: ["string", "null"]
+
+    BotSettings:
+      type: object
+      required: [txcChannel]
+      properties:
+        txcChannel:
+          type: string
+
+    BotSettingsInput:
+      type: object
+      properties:
+        txcChannel:
+          type: string
+
+    UpdateResult:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: ["string", "null"]
