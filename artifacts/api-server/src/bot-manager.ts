@@ -19,6 +19,26 @@ export function getLastBotError() {
   return _lastBotError;
 }
 
+/**
+ * Trả về public URL của server (dùng cho Telegram webhook).
+ * Ưu tiên: WEBHOOK_URL → RENDER_EXTERNAL_URL → RAILWAY_PUBLIC_DOMAIN → REPLIT_DEV_DOMAIN
+ */
+function getPublicUrl(): string | null {
+  const w = process.env["WEBHOOK_URL"];
+  if (w) return w.replace(/\/$/, "");
+
+  const render = process.env["RENDER_EXTERNAL_URL"];
+  if (render) return render.replace(/\/$/, "");
+
+  const railway = process.env["RAILWAY_PUBLIC_DOMAIN"];
+  if (railway) return `https://${railway.replace(/\/$/, "")}`;
+
+  const replit = process.env["REPLIT_DEV_DOMAIN"];
+  if (replit) return `https://${replit}`;
+
+  return null;
+}
+
 export async function startBot(token: string): Promise<void> {
   if (!_app) {
     throw new Error("App not registered with bot manager");
@@ -28,12 +48,11 @@ export async function startBot(token: string): Promise<void> {
   logger.info("Starting Telegram bot…");
 
   const bot = createBot(token);
+  const publicUrl = getPublicUrl();
 
-  const isProd = process.env["NODE_ENV"] === "production";
-  const domain = process.env["REPLIT_DEV_DOMAIN"] ?? "";
-
-  if (isProd && domain) {
-    // ── Webhook mode (production / Docker) ──────────────────────────────────
+  if (publicUrl) {
+    // ── Webhook mode ─────────────────────────────────────────────────────────
+    // Đăng ký handler TRƯỚC khi setWebhook
     _app.post("/api/bot-webhook", async (req, res) => {
       try {
         await bot.handleUpdate(req.body, res);
@@ -43,7 +62,7 @@ export async function startBot(token: string): Promise<void> {
       }
     });
 
-    const webhookUrl = `https://${domain}/api/bot-webhook`;
+    const webhookUrl = `${publicUrl}/api/bot-webhook`;
     await bot.telegram.setWebhook(webhookUrl);
     logger.info({ webhookUrl }, "Telegram webhook set ✓");
 
@@ -51,11 +70,10 @@ export async function startBot(token: string): Promise<void> {
     process.once("SIGTERM", () => { bot.telegram.deleteWebhook().catch(() => {}); });
 
   } else {
-    // ── Long-polling mode (dev / Replit) ─────────────────────────────────────
-    // Xoá webhook cũ nếu có (không throw nếu thất bại)
+    // ── Long-polling mode (local dev không có public URL) ────────────────────
+    // Xoá webhook cũ nếu có
     try { await bot.telegram.deleteWebhook({ drop_pending_updates: false }); } catch { /* ok */ }
 
-    // bot.launch() trả về Promise resolve ngay sau khi polling bắt đầu
     await bot.launch();
     logger.info("Telegram bot started (long-polling) ✓");
 
