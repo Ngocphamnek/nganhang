@@ -1,5 +1,5 @@
 # ─── Stage 1: Build ───────────────────────────────────────────────────────────
-FROM node:20-slim AS builder
+FROM node:22-slim AS builder
 
 # Install pnpm
 RUN npm install -g pnpm@10
@@ -37,7 +37,7 @@ RUN mkdir -p artifacts/api-server/public && \
 RUN pnpm --filter @workspace/api-server run build
 
 # ─── Stage 2: Production ──────────────────────────────────────────────────────
-FROM node:20-slim AS production
+FROM node:22-slim AS production
 
 WORKDIR /app/artifacts/api-server
 
