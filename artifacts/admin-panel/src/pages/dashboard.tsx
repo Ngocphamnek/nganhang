@@ -315,6 +315,8 @@ function SettingsTab() {
   const [botToken, setBotToken] = useState('');
   const [botTokenMasked, setBotTokenMasked] = useState('');
   const [botTokenSet, setBotTokenSet] = useState(false);
+  const [botRunning, setBotRunning] = useState(false);
+  const [botError, setBotError] = useState<string | null>(null);
   const [showToken, setShowToken] = useState(true);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<'channel' | 'token' | null>(null);
@@ -329,6 +331,8 @@ function SettingsTab() {
         setChannel(data.txcChannel ?? '');
         setBotTokenSet(data.botTokenSet ?? false);
         setBotTokenMasked(data.botTokenMasked ?? '');
+        setBotRunning(data.botRunning ?? false);
+        setBotError(data.botError ?? null);
       })
       .catch(() => setError('Không tải được cài đặt'))
       .finally(() => setLoading(false));
@@ -379,13 +383,16 @@ function SettingsTab() {
       });
       if (data.success) {
         setBotTokenSet(true);
+        setBotRunning(true);
+        setBotError(null);
         setBotTokenMasked(botToken.slice(0, 8) + '…' + botToken.slice(-4));
         setBotToken('');
         setShowToken(false);
         setSaved('token');
-        setTimeout(() => setSaved(null), 2000);
+        setTimeout(() => setSaved(null), 3000);
       } else {
         setError(data.message ?? 'Lỗi khi lưu');
+        setBotRunning(false);
       }
     } catch {
       setError('Không kết nối được API');

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db, botSettingsTable } from "@workspace/db";
 import { eq, inArray } from "drizzle-orm";
-import { startBot, isBotRunning } from "../bot-manager";
+import { startBot, isBotRunning, getLastBotError } from "../bot-manager";
 
 const router = Router();
 
@@ -53,6 +53,8 @@ router.get("/", requireAdmin, async (_req, res) => {
     txcChannel: map["txc_channel"] ?? DEFAULT_CHANNEL,
     botTokenSet,
     botTokenMasked,
+    botRunning: isBotRunning(),
+    botError: getLastBotError(),
   });
 });
 
@@ -78,11 +80,23 @@ router.put("/", requireAdmin, async (req, res) => {
     }
     await setSetting("bot_token", val);
 
-    // Khởi động bot ngay nếu chưa chạy
+    // Khởi động bot và chờ tối đa 15 giây để biết kết quả thực
     if (!isBotRunning()) {
-      startBot(val).catch((err) => {
-        console.error("Failed to start bot after token save:", err?.message ?? err);
-      });
+      try {
+        await Promise.race([
+          startBot(val),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("Timeout — bot start quá 15 giây")), 15_000),
+          ),
+        ]);
+        return res.json({ success: true, message: "Bot đã khởi động thành công ✓" });
+      } catch (err: any) {
+        const msg: string = err?.message ?? String(err);
+        return res.status(500).json({
+          success: false,
+          message: `Token đã lưu nhưng bot không khởi động được: ${msg}`,
+        });
+      }
     }
   }
 
