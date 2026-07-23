@@ -1,6 +1,10 @@
 // ─── Game analyzers — api.s6688v.xyz ────────────────────────────────────────
 
 import { createHash } from "node:crypto";
+import {
+  runTournament,
+  formatTournamentSection,
+} from "./tournament";
 
 function md5hex(input: string): string {
   return createHash("md5").update(input, "utf8").digest("hex");
@@ -403,6 +407,8 @@ function buildPatternPrediction(sessions: Session[]): string {
 function analyzeTX(key: string, sessions: Session[], title: string, emoji: string): string {
   // Dùng 100 phiên gần nhất cho hiển thị thống kê
   const display = sessions.slice(0, 100);
+  // Tournament chạy trên tối đa 110 phiên để có đủ backtest
+  const tournamentLabels = sessions.slice(0, 110).map(s => txLabel(s.rs));
 
   // ── Verify previous prediction ──
   verifyPred(key, sessions, s => txLabel(s.rs));
@@ -428,6 +434,10 @@ function analyzeTX(key: string, sessions: Session[], title: string, emoji: strin
     `  <code>#${r.id}</code> [${r.dice.join("-")}]=${r.sum} → <b>${txEmoji(r.label)} ${r.label}</b>`
   ).join("\n");
 
+  // Tournament AI
+  const tour = runTournament(tournamentLabels, { "Tài": "Xỉu", "Xỉu": "Tài" });
+  const tourSection = formatTournamentSection(tour, tour.prediction, txEmoji(tour.prediction));
+
   return [
     `${emoji} <b>${title} — Phân tích trực tiếp</b>`,
     `━━━━━━━━━━━━━━━━━━━━`,
@@ -446,6 +456,7 @@ function analyzeTX(key: string, sessions: Session[], title: string, emoji: strin
     `📋 <b>5 phiên chi tiết:</b>`,
     recent,
     buildPatternPrediction(sessions),
+    tourSection,
   ].join("\n");
 }
 
@@ -592,6 +603,10 @@ function analyzeTXMD5(key: string, sessions: Session[]): string {
     `🤖 <b>Kết luận:</b> ${txEmoji(md5Vote)} <b>${md5Vote}</b>  (${votes[md5Vote]}/4 phiếu)`,
     `🎯 <b>Độ tin cậy cầu:</b> ${cau.confidence}` + accLine(key),
     buildPatternPrediction(sessions),
+    (() => {
+      const t = runTournament(diceLabels, { "Tài": "Xỉu", "Xỉu": "Tài" });
+      return formatTournamentSection(t, t.prediction, txEmoji(t.prediction));
+    })(),
   ].join("\n");
 }
 
@@ -721,6 +736,10 @@ function analyzeLH(key: string, sessions: Session[]): string {
     ``,
     `🤖 <b>Bot dự đoán:</b> ${lhEmoji(cau.predictedLabel)} <b>${cau.prediction}</b>`,
     `🎯 <b>Độ tin cậy:</b> ${cau.confidence}` + accLine(key),
+    (() => {
+      const t = runTournament(nonHoa, { "Rồng": "Hổ", "Hổ": "Rồng" });
+      return formatTournamentSection(t, t.prediction, lhEmoji(t.prediction));
+    })(),
   ].join("\n");
 }
 
@@ -1089,22 +1108,47 @@ export async function fetchAndBuildAdvanced(key: string): Promise<AdvancedPredic
     // ── Xúc Xắc: đọc từ nhóm Telegram riêng ──────────────────────────────
     if (key === "xucxac") {
       const { fetchXucXacSessions } = await import("./xucxac");
-      const xucSessions = await fetchXucXacSessions(100);
+      // Lấy 110 phiên để tournament có đủ 100 phiên backtest
+      const xucSessions = await fetchXucXacSessions(110);
       if (xucSessions.length < 10) return skipResult("Không đủ dữ liệu Xúc Xắc");
 
       const xucTyped = xucSessions as Array<{ sessionId: number; label: string }>;
       const xucActualLabel = xucTyped[0]?.label ?? null;
       const xucLatestId    = xucTyped[0]?.sessionId ?? null;
 
-      // Bước 1: xác minh dự đoán trước — await để counter được cập nhật trước khi đọc
+      // Bước 1: xác minh dự đoán trước
       if (xucActualLabel) {
         await verifyPrediction(key, xucActualLabel).catch(() => {});
       }
 
       const labels = xucTyped.map(s => s.label);
-      const result = analyzeAdvancedTrend(labels, { "Tài": "Xỉu", "Xỉu": "Tài" });
 
-      // Bước 2: ghi dự đoán mới nếu BET
+      // Tournament: chọn chiến lược tốt nhất qua backtest 10→100 phiên
+      const tour = runTournament(labels, { "Tài": "Xỉu", "Xỉu": "Tài" });
+
+      // Dùng kết quả tournament làm primary prediction
+      const result: AdvancedPrediction = tour.action === "BET"
+        ? {
+            action: "BET",
+            prediction: tour.prediction,
+            confidence: tour.confidence,
+            trendScore: tour.confidence,
+            freqScore: 0,
+            revScore: 0,
+            reason: `Tournament champion: ${tour.champion} (${(tour.accuracy * 100).toFixed(1)}% thực tế · ${tour.testedSessions}p backtest)`,
+            indicators: `${tour.champion} thắng qua ${tour.roundsRun} vòng loại`,
+            capitalAdvice: tour.accuracy >= 0.65 ? "Vốn vừa (15–20% bankroll)" : "Vốn nhỏ (5–10% bankroll)",
+            counterN: null, counterResult: null,
+            actualLabel: xucActualLabel,
+            latestSessionId: xucLatestId,
+          }
+        : {
+            ...skipResult("Tournament chưa tìm ra chiến lược đủ tin cậy"),
+            actualLabel: xucActualLabel,
+            latestSessionId: xucLatestId,
+          };
+
+      // Bước 2: ghi dự đoán nếu BET
       if (result.action === "BET" && xucTyped[0]) {
         logPrediction({
           gameKey: key, sessionId: xucTyped[0].sessionId,
@@ -1114,23 +1158,21 @@ export async function fetchAndBuildAdvanced(key: string): Promise<AdvancedPredic
         }).catch(() => {});
       }
 
-      // Gắn counter vào kết quả
       const ctr = getAdvancedCounter(key);
-      return { ...result, counterN: ctr?.n ?? null, counterResult: ctr?.lastResult ?? null, actualLabel: xucActualLabel, latestSessionId: xucLatestId };
+      return { ...result, counterN: ctr?.n ?? null, counterResult: ctr?.lastResult ?? null };
     }
 
     // ── Các game API web ──────────────────────────────────────────────────
     const url = GAME_APIS[key];
     if (!url) return skipResult("Game không hỗ trợ phân tích nâng cao");
 
-    // Dùng session cache — không gọi lại mạng nếu analyzeGame đã fetch trong 30s
+    // Lấy 110 phiên: 100 để hiển thị + 10 buffer cho tournament
     const sessions = await fetchSessionsCached(url, key);
     if (sessions.length < 10) return skipResult("Không đủ dữ liệu (cần ≥ 10 phiên)");
 
-    // Chuyển đổi session thô → mảng label theo từng loại game
     let labels: string[];
     let opposites: Record<string, string>;
-    let actualLabel: string | null = null;  // label phiên mới nhất (để verify)
+    let actualLabel: string | null = null;
 
     switch (key) {
       case "taixiu":
@@ -1141,7 +1183,6 @@ export async function fetchAndBuildAdvanced(key: string): Promise<AdvancedPredic
         break;
 
       case "rongho":
-        // Bỏ qua "Hòa" — không có label đối nghịch xác định
         labels      = sessions.map(s => lhLabel(s.rs)).filter(l => l !== "Hòa");
         opposites   = { "Rồng": "Hổ", "Hổ": "Rồng" };
         actualLabel = lhLabel(sessions[0].rs) === "Hòa" ? null : lhLabel(sessions[0].rs);
@@ -1151,16 +1192,43 @@ export async function fetchAndBuildAdvanced(key: string): Promise<AdvancedPredic
         return skipResult("Game chưa hỗ trợ phân tích xu hướng");
     }
 
-    // Bước 1: xác minh dự đoán kỳ trước — await để counter được cập nhật trước khi đọc
+    // Xác minh dự đoán kỳ trước
     if (actualLabel) {
       await verifyPrediction(key, actualLabel).catch(() => {});
     }
 
     if (labels.length < 10) return skipResult("Không đủ phiên hợp lệ sau khi lọc");
 
-    const result = analyzeAdvancedTrend(labels, opposites);
+    // Tournament: chọn chiến lược tốt nhất
+    const tour = runTournament(labels, opposites);
 
-    // Bước 2: ghi dự đoán mới nếu BET
+    // Nếu tournament không đủ tin cậy → fallback sang analyzeAdvancedTrend
+    let result: AdvancedPrediction;
+    if (tour.action === "BET") {
+      result = {
+        action: "BET",
+        prediction: tour.prediction,
+        confidence: tour.confidence,
+        trendScore: tour.confidence,
+        freqScore: 0,
+        revScore: 0,
+        reason: `Tournament champion: ${tour.champion} (${(tour.accuracy * 100).toFixed(1)}% thực tế · ${tour.testedSessions}p backtest)`,
+        indicators: `${tour.champion} thắng qua ${tour.roundsRun} vòng loại`,
+        capitalAdvice: tour.accuracy >= 0.65 ? "Vốn vừa (15–20% bankroll)" : "Vốn nhỏ (5–10% bankroll)",
+        counterN: null, counterResult: null,
+        actualLabel: actualLabel ?? null,
+        latestSessionId: sessions[0]?.sessionId ?? null,
+      };
+    } else {
+      // Fallback: dùng thuật toán cổ điển
+      result = {
+        ...analyzeAdvancedTrend(labels, opposites),
+        actualLabel: actualLabel ?? null,
+        latestSessionId: sessions[0]?.sessionId ?? null,
+      };
+    }
+
+    // Ghi dự đoán mới nếu BET
     if (result.action === "BET" && sessions[0]) {
       logPrediction({
         gameKey: key, sessionId: sessions[0].sessionId,
@@ -1170,14 +1238,11 @@ export async function fetchAndBuildAdvanced(key: string): Promise<AdvancedPredic
       }).catch(() => {});
     }
 
-    // Gắn counter vào kết quả
     const ctr = getAdvancedCounter(key);
     return {
       ...result,
       counterN: ctr?.n ?? null,
       counterResult: ctr?.lastResult ?? null,
-      actualLabel: actualLabel ?? null,
-      latestSessionId: sessions[0]?.sessionId ?? null,
     };
 
   } catch (err: any) {

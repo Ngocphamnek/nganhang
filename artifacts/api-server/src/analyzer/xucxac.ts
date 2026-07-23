@@ -1,6 +1,7 @@
 // ─── Xúc Xắc: đọc lịch sử từ nhóm Telegram @lichsuphienclmmgg ───────────────
 
 import { getMainClient } from "../mtproto/client";
+import { runAllDiceTournaments, formatDiceFaceTournamentSection } from "./tournament";
 
 const CHANNEL = "lichsuphienclmmgg";
 
@@ -311,6 +312,10 @@ export function buildXucXacAnalysis(sessions: XucXacSession[]): string {
 
   // (thống kê thắng/thua gửi riêng qua buildXucXacStatsMsg)
 
+  // ── Face tournament: 3 tournament độc lập cho từng con xúc xắc ──────────────
+  const diceTournaments = runAllDiceTournaments(sessions);
+  const faceTourSection = formatDiceFaceTournamentSection(diceTournaments);
+
   return [
     `🎲 <b>Xúc Xắc CLMM.GG — Phân tích trực tiếp</b>`,
     `<i>📡 Nguồn: nhóm Telegram @lichsuphienclmmgg · ${total} phiên gần nhất</i>`,
@@ -338,6 +343,7 @@ export function buildXucXacAnalysis(sessions: XucXacSession[]): string {
     `🎯 <b>Tài/Xỉu:</b> ${txPredEmoji} <b>${txPredLabel.toUpperCase()}</b>  <i>(${txCau.prediction})</i>`,
     `🎯 <b>Chẵn/Lẻ:</b> ${clPredEmoji} <b>${clPredLabel.toUpperCase()}</b>  <i>(${clCau.prediction})</i>`,
     `📊 <b>Độ tin cậy:</b> ${txCau.confidence}`,
+    faceTourSection,
   ].join("\n");
 }
 
